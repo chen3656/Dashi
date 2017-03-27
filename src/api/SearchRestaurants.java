@@ -18,12 +18,16 @@ import db.DBConnection;
 import db.MongoDBConnection;
 import db.MySQLDBConnection;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Servlet implementation class SearchRestaurants
  */
 @WebServlet("/restaurants")
 public class SearchRestaurants extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = Logger.getLogger(SearchRestaurants.class.getName());
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -41,7 +45,6 @@ public class SearchRestaurants extends HttpServlet {
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		// allow access only if session exists
-		
 		HttpSession session = request.getSession();
 		if (session.getAttribute("user") == null) {
 			response.setStatus(403);
@@ -49,15 +52,20 @@ public class SearchRestaurants extends HttpServlet {
 		}
 		JSONArray array = new JSONArray();
 		DBConnection connection = new MySQLDBConnection();
-		if (request.getParameterMap().containsKey("user_id") && request.getParameterMap().containsKey("lat")
+                       //Comment those session related codes
+		if (request.getParameterMap().containsKey("lat")
 				&& request.getParameterMap().containsKey("lon")) {
-			String userId = request.getParameter("user_id");
+			// term is null or empty by default
 			String term = request.getParameter("term");
+			String userId = (String) session.getAttribute("user");
+			//String userId = "1111";
 			double lat = Double.parseDouble(request.getParameter("lat"));
 			double lon = Double.parseDouble(request.getParameter("lon"));
+			LOGGER.log(Level.INFO, "lat:" + lat + ",lon:" + lon);
 			array = connection.searchRestaurants(userId, lat, lon, term);
 		}
 		RpcParser.writeOutput(response, array);
+
 
 	}
 
